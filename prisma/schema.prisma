@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Veterinario {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  apellido  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mascotas Mascota[]
+  citas    Cita[]
+}
+
+model Mascota {
+  id             String   @id @default(uuid())
+  nombre         String
+  especie        String
+  raza           String
+  edad           Int
+  dueñoNombre   String
+  dueñoContacto String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  veterinarioId String
+  veterinario   Veterinario @relation(fields: [veterinarioId], references: [id])
+  citas         Cita[]
+}
+
+model Cita {
+  id          String   @id @default(uuid())
+  fecha       DateTime
+  motivo      String
+  descripcion String?
+  estado      String   @default("pendiente") // pendiente, completada, cancelada
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  veterinarioId String
+  veterinario   Veterinario @relation(fields: [veterinarioId], references: [id])
+  mascotaId     String
+  mascota       Mascota     @relation(fields: [mascotaId], references: [id])
+}
