@@ -2,7 +2,7 @@
 
 Una API REST robusta para la gestión de clínicas veterinarias, construida con **Node.js**, **TypeScript**, **Prisma** y **PostgreSQL**.
 
-![API Documentation](./assets/screenshots/swagger_docs.png)
+![API Documentation](./assets/image.png)
 
 ## 🚀 Características
 
