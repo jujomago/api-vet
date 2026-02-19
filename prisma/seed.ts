@@ -79,6 +79,35 @@ async function main() {
     });
 
     console.log('✅ Created appointments');
+
+    // 5. Create Products
+    await prisma.producto.createMany({
+        data: [
+            {
+                nombre: 'Antipulgas NexGard',
+                descripcion: 'Tableta masticable para perros de 10-25kg',
+                precio: 25.50,
+                stock: 15,
+                categoria: 'farmacia'
+            },
+            {
+                nombre: 'Arena para Gatos 5kg',
+                descripcion: 'Arena aglomerante con aroma a lavanda',
+                precio: 12.00,
+                stock: 0,
+                categoria: 'accesorio'
+            },
+            {
+                nombre: 'Alimento Royal Canin Adulto',
+                descripcion: 'Saco de 15kg para perros adultos',
+                precio: 65.00,
+                stock: 3,
+                categoria: 'alimento'
+            }
+        ]
+    });
+
+    console.log('✅ Created products');
     console.log('🚀 Seeding finished successfully!');
 }
 

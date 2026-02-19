@@ -8,6 +8,7 @@ import { errorMiddleware } from './middlewares/error.middleware';
 import authRoutes from './routes/auth.routes';
 import petRoutes from './routes/pet.routes';
 import appointmentRoutes from './routes/appointment.routes';
+import productRoutes from './routes/product.routes';
 
 class App {
     public app: Application;
@@ -72,6 +73,7 @@ class App {
         this.app.use('/api/v1/auth', authRoutes);
         this.app.use('/api/v1/pets', petRoutes);
         this.app.use('/api/v1/appointments', appointmentRoutes);
+        this.app.use('/api/v1/products', productRoutes);
     }
 
     private errorHandler(): void {

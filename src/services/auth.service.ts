@@ -48,9 +48,10 @@ class AuthService {
             throw error;
         }
 
+        const secret = process.env.JWT_SECRET || 'secret';
         const token = jwt.sign(
             { id: user.id, email: user.email },
-            process.env.JWT_SECRET || 'secret',
+            secret,
             { expiresIn: (process.env.JWT_EXPIRES_IN || '1d') as any }
         );
 

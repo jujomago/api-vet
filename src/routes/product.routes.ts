@@ -1,26 +1,26 @@
 import { Router } from 'express';
-import petController from '../controllers/pet.controller';
+import productController from '../controllers/product.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-// Protect all routes
+// Protect all routes (inventory is usually for staff)
 router.use(authMiddleware as any);
 
 /**
  * @swagger
- * /pets:
+ * /products:
  *   get:
- *     summary: Get all pets for the authenticated veterinarian
- *     tags: [Pets]
+ *     summary: Get all products
+ *     tags: [Inventory]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of pets
+ *         description: List of products
  *   post:
- *     summary: Create a new pet
- *     tags: [Pets]
+ *     summary: Create a new product
+ *     tags: [Inventory]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -32,29 +32,27 @@ router.use(authMiddleware as any);
  *             properties:
  *               nombre:
  *                 type: string
- *               especie:
+ *               descripcion:
  *                 type: string
- *               raza:
- *                 type: string
- *               edad:
+ *               precio:
+ *                 type: number
+ *               stock:
  *                 type: integer
- *               dueñoNombre:
- *                 type: string
- *               dueñoContacto:
+ *               categoria:
  *                 type: string
  *     responses:
  *       201:
- *         description: Pet created
+ *         description: Product created
  */
-router.get('/', petController.getAll as any);
-router.post('/', petController.create as any);
+router.get('/', productController.getAll as any);
+router.post('/', productController.create as any);
 
 /**
  * @swagger
- * /pets/{id}:
+ * /products/{id}:
  *   get:
- *     summary: Get a pet by ID
- *     tags: [Pets]
+ *     summary: Get a product by ID
+ *     tags: [Inventory]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -65,10 +63,10 @@ router.post('/', petController.create as any);
  *           type: string
  *     responses:
  *       200:
- *         description: Pet details
+ *         description: Product details
  *   patch:
- *     summary: Update a pet
- *     tags: [Pets]
+ *     summary: Update a product
+ *     tags: [Inventory]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -78,18 +76,18 @@ router.post('/', petController.create as any);
  *             type: object
  *     responses:
  *       200:
- *         description: Pet updated
+ *         description: Product updated
  *   delete:
- *     summary: Delete a pet
- *     tags: [Pets]
+ *     summary: Delete a product
+ *     tags: [Inventory]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       204:
- *         description: Pet deleted
+ *         description: Product deleted
  */
-router.get('/:id', petController.getById as any);
-router.patch('/:id', petController.update as any);
-router.delete('/:id', petController.delete as any);
+router.get('/:id', productController.getById as any);
+router.patch('/:id', productController.update as any);
+router.delete('/:id', productController.delete as any);
 
 export default router;

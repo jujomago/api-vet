@@ -45,6 +45,7 @@ model Cita {
   motivo      String
   descripcion String?
   estado      String   @default("pendiente") // pendiente, completada, cancelada
+  tipo        String   @default("medica") // medica, estetica
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -52,4 +53,15 @@ model Cita {
   veterinario   Veterinario @relation(fields: [veterinarioId], references: [id])
   mascotaId     String
   mascota       Mascota     @relation(fields: [mascotaId], references: [id])
+}
+
+model Producto {
+  id          String   @id @default(uuid())
+  nombre      String
+  descripcion String?
+  precio      Float
+  stock       Int      @default(0)
+  categoria   String   @default("farmacia") // farmacia, alimento, accesorio
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

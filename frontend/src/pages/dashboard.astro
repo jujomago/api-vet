@@ -1,0 +1,138 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Dashboard">
+	<div class="app-container">
+		<Sidebar />
+		<div class="main-content">
+			<Header title="Dashboard Principal" />
+			
+			<div class="dashboard-grid">
+				<div class="card stat-card">
+					<span class="stat-icon">🐶</span>
+					<div class="stat-info">
+						<h3>Mascotas</h3>
+						<p id="petCount" class="stat-value">--</p>
+					</div>
+				</div>
+				<div class="card stat-card">
+					<span class="stat-icon">📅</span>
+					<div class="stat-info">
+						<h3>Citas Hoy</h3>
+						<p id="appointmentCount" class="stat-value">--</p>
+					</div>
+				</div>
+				<div class="card stat-card">
+					<span class="stat-icon">📦</span>
+					<div class="stat-info">
+						<h3>Stock Bajo</h3>
+						<p id="stockAlertCount" class="stat-value">--</p>
+					</div>
+				</div>
+			</div>
+
+            <section class="recent-section">
+                <div class="card">
+                    <h2>Actividad Reciente</h2>
+                    <p class="text-muted">Aquí verás las citas más próximas y productos añadidos.</p>
+                </div>
+            </section>
+		</div>
+	</div>
+</Layout>
+
+<script>
+    import api from '../api/base';
+
+    // Simple auth check
+    if (!localStorage.getItem('token')) {
+        window.location.href = '/login';
+    }
+
+    async function loadStats() {
+        try {
+            const [petsRes, appointmentsRes, productsRes] = await Promise.all([
+                api.get('/pets'),
+                api.get('/appointments'),
+                api.get('/products')
+            ]);
+
+            const pets = petsRes.data.data.pets;
+            const appointments = appointmentsRes.data.data.appointments;
+            const products = productsRes.data.data.products;
+
+            document.getElementById('petCount')!.textContent = pets.length.toString();
+            document.getElementById('appointmentCount')!.textContent = appointments.length.toString();
+            
+            const lowStock = products.filter((p: any) => p.stock < 5).length;
+            document.getElementById('stockAlertCount')!.textContent = lowStock.toString();
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    loadStats();
+</script>
+
+<style>
+	.app-container {
+		display: flex;
+	}
+
+	.main-content {
+		flex: 1;
+		margin-left: 260px;
+		padding: 7rem 2.5rem 2rem;
+        min-height: 100vh;
+	}
+
+	.dashboard-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 1.5rem;
+		margin-bottom: 2rem;
+	}
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        background: #f1f5f9;
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+    }
+
+    .stat-info h3 {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .recent-section h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+    }
+</style>

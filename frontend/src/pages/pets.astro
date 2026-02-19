@@ -1,0 +1,167 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Pacientes">
+	<div class="app-container">
+		<Sidebar />
+		<div class="main-content">
+			<Header title="Gestión de Pacientes" />
+			
+			<div class="inventory-actions">
+                <button class="btn btn-primary" id="addPetBtn">+ Registrar Mascota</button>
+            </div>
+
+            <div class="card table-card glass">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Especie/Raza</th>
+                            <th>Edad</th>
+                            <th>Dueño</th>
+                            <th>Contacto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="petsBody">
+                        <!-- Content loaded by JS -->
+                    </tbody>
+                </table>
+            </div>
+		</div>
+	</div>
+
+    <!-- Simple Pet Modal -->
+    <div id="petModal" class="modal-overlay hidden">
+        <div class="card modal-content">
+            <h2>Registrar Nueva Mascota</h2>
+            <form id="petForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="mNombre" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Especie</label>
+                        <input type="text" id="mEspecie" placeholder="Ej: Perro, Gato" required />
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Raza</label>
+                        <input type="text" id="mRaza" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Edad (Años)</label>
+                        <input type="number" id="mEdad" required />
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre del Dueño</label>
+                        <input type="text" id="mDueño" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Contacto Dueño</label>
+                        <input type="text" id="mContacto" required />
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" id="cancelPetBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    import api from '../api/base';
+
+    // Auth check
+    if (!localStorage.getItem('token')) {
+        window.location.href = '/login';
+    }
+
+    const body = document.getElementById('petsBody');
+    const modal = document.getElementById('petModal');
+    const addBtn = document.getElementById('addPetBtn');
+    const cancelBtn = document.getElementById('cancelPetBtn');
+    const form = document.getElementById('petForm') as HTMLFormElement;
+
+    async function loadPets() {
+        try {
+            const res = await api.get('/pets');
+            renderTable(res.data.data.pets);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function renderTable(pets: any[]) {
+        if (!body) return;
+        body.innerHTML = pets.map(p => `
+            <tr>
+                <td><strong>${p.nombre}</strong></td>
+                <td>${p.especie} - <span class="text-muted">${p.raza}</span></td>
+                <td>${p.edad} años</td>
+                <td>${p.dueñoNombre}</td>
+                <td>${p.dueñoContacto}</td>
+                <td>
+                    <button class="btn-icon">📋</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    addBtn?.addEventListener('click', () => modal?.classList.remove('hidden'));
+    cancelBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            nombre: (document.getElementById('mNombre') as HTMLInputElement).value,
+            especie: (document.getElementById('mEspecie') as HTMLInputElement).value,
+            raza: (document.getElementById('mRaza') as HTMLInputElement).value,
+            edad: parseInt((document.getElementById('mEdad') as HTMLInputElement).value),
+            dueñoNombre: (document.getElementById('mDueño') as HTMLInputElement).value,
+            dueñoContacto: (document.getElementById('mContacto') as HTMLInputElement).value
+        };
+
+        try {
+            await api.post('/pets', data);
+            modal?.classList.add('hidden');
+            form.reset();
+            loadPets();
+        } catch (error) {
+            alert('Error al registrar la mascota');
+        }
+    });
+
+    loadPets();
+</script>
+
+<style>
+	.app-container { display: flex; }
+	.main-content {
+		flex: 1;
+		margin-left: 260px;
+		padding: 7rem 2.5rem 2rem;
+	}
+    .inventory-actions { display: flex; justify-content: flex-end; margin-bottom: 1.5rem; }
+    .table-card { padding: 0; overflow: hidden; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 1rem 1.5rem; background: #f8fafc; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+    td { padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+    .text-muted { color: #64748b; font-size: 0.85rem; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { width: 100%; max-width: 600px; }
+    .hidden { display: none; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .form-group input { width: 100%; padding: 0.6rem; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+</style>

@@ -50,6 +50,10 @@ router.get('/', appointmentController.getAll as any);
  *               mascotaId:
  *                 type: string
  *                 format: uuid
+ *               tipo:
+ *                 type: string
+ *                 enum: [medica, estetica]
+ *                 default: medica
  *     responses:
  *       201:
  *         description: Appointment created
@@ -62,6 +66,8 @@ router.post('/', appointmentController.create as any);
  *   get:
  *     summary: Get an appointment by ID
  *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -80,6 +86,8 @@ router.get('/:id', appointmentController.getById as any);
  *   patch:
  *     summary: Update an appointment
  *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       content:
  *         application/json:
@@ -97,6 +105,8 @@ router.patch('/:id', appointmentController.update as any);
  *   delete:
  *     summary: Delete an appointment
  *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       204:
  *         description: Appointment deleted

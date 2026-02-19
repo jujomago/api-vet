@@ -1,0 +1,112 @@
+---
+const menuItems = [
+    { name: 'Dashboard', icon: '📊', href: '/dashboard' },
+    { name: 'Mascotas', icon: '🐶', href: '/pets' },
+    { name: 'Citas', icon: '📅', href: '/appointments' },
+    { name: 'Inventario', icon: '📦', href: '/inventory' },
+];
+---
+
+<aside class="sidebar glass">
+    <div class="sidebar-brand">
+        <span class="logo">🐾</span>
+        <h2>VetCare</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+        {menuItems.map((item) => (
+            <a href={item.href} class="nav-item">
+                <span class="icon">{item.icon}</span>
+                <span class="label">{item.name}</span>
+            </a>
+        ))}
+    </nav>
+
+    <div class="sidebar-footer">
+        <button id="logoutBtn" class="nav-item logout">
+            <span class="icon">🚪</span>
+            <span class="label">Cerrar Sesión</span>
+        </button>
+    </div>
+</aside>
+
+<script>
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn?.addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    });
+</script>
+
+<style>
+    .sidebar {
+        width: 260px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 2rem 1rem;
+        z-index: 100;
+        border-radius: 0;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0 1rem;
+        margin-bottom: 3rem;
+    }
+
+    .sidebar-brand h2 {
+        font-size: 1.25rem;
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+    .sidebar-nav {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.85rem 1rem;
+        text-decoration: none;
+        color: var(--text-muted);
+        border-radius: var(--radius);
+        transition: all 0.2s;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .nav-item:hover {
+        background: #f1f5f9;
+        color: var(--accent);
+    }
+
+    .icon {
+        font-size: 1.25rem;
+    }
+
+    .logout {
+        margin-top: auto;
+        color: var(--error);
+    }
+
+    .logout:hover {
+        background: #fef2f2;
+        color: var(--error);
+    }
+</style>

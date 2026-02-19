@@ -1,0 +1,244 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Inventario">
+	<div class="app-container">
+		<Sidebar />
+		<div class="main-content">
+			<Header title="Gestión de Inventario" />
+			
+			<div class="inventory-actions">
+                <button class="btn btn-primary" id="addBtn">+ Añadir Producto</button>
+            </div>
+
+            <div class="card table-card glass">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryBody">
+                        <!-- Content loaded by JS -->
+                    </tbody>
+                </table>
+            </div>
+		</div>
+	</div>
+
+    <!-- Simple Add Modal (Hidden by default) -->
+    <div id="productModal" class="modal-overlay hidden">
+        <div class="card modal-content">
+            <h2>Nuevo Producto</h2>
+            <form id="productForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="pNombre" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="pCategoria">
+                            <option value="farmacia">Farmacia</option>
+                            <option value="alimento">Alimento</option>
+                            <option value="accesorio">Accesorio</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Precio ($)</label>
+                        <input type="number" id="pPrecio" step="0.01" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Inicial</label>
+                        <input type="number" id="pStock" required />
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" id="cancelBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    import api from '../api/base';
+
+    // Simple auth check
+    // Auth check
+    if (!localStorage.getItem('token')) {
+        window.location.href = '/login';
+    }
+
+    const body = document.getElementById('inventoryBody');
+    const modal = document.getElementById('productModal');
+    const addBtn = document.getElementById('addBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const form = document.getElementById('productForm') as HTMLFormElement;
+
+    async function loadProducts() {
+        try {
+            const res = await api.get('/products');
+            renderTable(res.data.data.products);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function renderTable(products: any[]) {
+        if (!body) return;
+        body.innerHTML = products.map(p => `
+            <tr>
+                <td><strong>${p.nombre}</strong></td>
+                <td><span class="badge">${p.categoria}</span></td>
+                <td>$${p.precio.toFixed(2)}</td>
+                <td>${p.stock}</td>
+                <td>
+                    <span class="status ${p.stock < 5 ? 'low' : 'ok'}">
+                        ${p.stock < 5 ? 'Bajo Stock' : 'Disponible'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn-icon">✏️</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    addBtn?.addEventListener('click', () => modal?.classList.remove('hidden'));
+    cancelBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            nombre: (document.getElementById('pNombre') as HTMLInputElement).value,
+            categoria: (document.getElementById('pCategoria') as HTMLSelectElement).value,
+            precio: parseFloat((document.getElementById('pPrecio') as HTMLInputElement).value),
+            stock: parseInt((document.getElementById('pStock') as HTMLInputElement).value)
+        };
+
+        try {
+            await api.post('/products', data);
+            modal?.classList.add('hidden');
+            form.reset();
+            loadProducts();
+        } catch (error) {
+            alert('Error al guardar el producto');
+        }
+    });
+
+    loadProducts();
+</script>
+
+<style>
+	.app-container { display: flex; }
+	.main-content {
+		flex: 1;
+		margin-left: 260px;
+		padding: 7rem 2.5rem 2rem;
+	}
+
+    .inventory-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1.5rem;
+    }
+
+    .table-card { padding: 0; overflow: hidden; }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        padding: 1rem 1.5rem;
+        background: #f8fafc;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.95rem;
+    }
+
+    .badge {
+        background: #e2e8f0;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: 99px;
+    }
+
+    .status.ok { background: #dcfce7; color: #166534; }
+    .status.low { background: #fee2e2; color: #991b1b; }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 500px;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    .hidden { display: none; }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group label { display: block; font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
