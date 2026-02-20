@@ -33,12 +33,39 @@ class PetService {
     }
 
     async update(id: string, data: UpdatePetInput, veterinarianId: string) {
-        // Ensure the pet belongs to the veterinarian
+        const { version, ...updateData } = data;
+
+        if (version !== undefined) {
+            const result = await prisma.mascota.updateMany({
+                where: {
+                    id,
+                    version: version,
+                    veterinarioId: veterinarianId,
+                },
+                data: {
+                    ...updateData,
+                    version: { increment: 1 },
+                },
+            });
+
+            if (result.count === 0) {
+                const error: AppError = new Error('Conflict: The pet record has been modified by another user.');
+                error.statusCode = 409;
+                throw error;
+            }
+
+            return await this.getById(id, veterinarianId);
+        }
+
+        // Fallback for updates without version
         await this.getById(id, veterinarianId);
 
         return await prisma.mascota.update({
             where: { id },
-            data,
+            data: {
+                ...updateData,
+                version: { increment: 1 },
+            },
         });
     }
 

@@ -14,6 +14,7 @@ export const updateAppointmentSchema = z.object({
     descripcion: z.string().optional(),
     estado: z.enum(['pendiente', 'completada', 'cancelada']).optional(),
     tipo: z.enum(['medica', 'estetica']).optional(),
+    version: z.number().int().optional(),
 });
 
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;

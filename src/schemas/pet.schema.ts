@@ -9,7 +9,9 @@ export const createPetSchema = z.object({
     dueñoContacto: z.string().min(5),
 });
 
-export const updatePetSchema = createPetSchema.partial();
+export const updatePetSchema = createPetSchema.partial().extend({
+    version: z.number().int().optional(),
+});
 
 export type CreatePetInput = z.infer<typeof createPetSchema>;
 export type UpdatePetInput = z.infer<typeof updatePetSchema>;

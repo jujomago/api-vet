@@ -51,13 +51,40 @@ class AppointmentService {
     }
 
     async update(id: string, data: UpdateAppointmentInput, veterinarianId: string) {
+        const { version, ...updateData } = data;
+
+        if (version !== undefined) {
+            const result = await prisma.cita.updateMany({
+                where: {
+                    id,
+                    version: version,
+                    veterinarioId: veterinarianId,
+                },
+                data: {
+                    ...updateData,
+                    fecha: updateData.fecha ? new Date(updateData.fecha) : undefined,
+                    version: { increment: 1 },
+                },
+            });
+
+            if (result.count === 0) {
+                const error: AppError = new Error('Conflict: This appointment has been modified by another user.');
+                error.statusCode = 409;
+                throw error;
+            }
+
+            return await this.getById(id, veterinarianId);
+        }
+
+        // Fallback for updates without version
         await this.getById(id, veterinarianId);
 
         return await prisma.cita.update({
             where: { id },
             data: {
-                ...data,
-                fecha: data.fecha ? new Date(data.fecha) : undefined,
+                ...updateData,
+                fecha: updateData.fecha ? new Date(updateData.fecha) : undefined,
+                version: { increment: 1 },
             },
         });
     }

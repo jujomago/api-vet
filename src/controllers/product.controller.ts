@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../middlewares/error.middleware';
 import ProductService from '../services/product.service';
 import { createProductSchema, updateProductSchema } from '../schemas/product.schema';
 
@@ -35,6 +36,21 @@ class ProductController {
         try {
             const data = updateProductSchema.parse(req.body);
             const product = await ProductService.update(req.params.id as string, data);
+            res.json({ status: 'success', data: { product } });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async adjustStock(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { quantity } = req.body;
+            if (typeof quantity !== 'number') {
+                const error: AppError = new Error('Quantity must be a number');
+                error.statusCode = 400;
+                throw error;
+            }
+            const product = await ProductService.adjustStock(req.params.id as string, quantity);
             res.json({ status: 'success', data: { product } });
         } catch (error) {
             next(error);

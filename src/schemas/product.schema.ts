@@ -8,7 +8,9 @@ export const createProductSchema = z.object({
     categoria: z.string().default('farmacia'),
 });
 
-export const updateProductSchema = createProductSchema.partial();
+export const updateProductSchema = createProductSchema.partial().extend({
+    version: z.number().int().optional(),
+});
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;

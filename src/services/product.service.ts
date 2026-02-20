@@ -30,12 +30,53 @@ class ProductService {
     }
 
     async update(id: string, data: UpdateProductInput) {
-        await this.getById(id);
+        const { version, ...updateData } = data;
 
+        // If version is provided, we use it for optimistic locking
+        if (version !== undefined) {
+            const result = await prisma.producto.updateMany({
+                where: {
+                    id,
+                    version: version,
+                },
+                data: {
+                    ...updateData,
+                    version: { increment: 1 },
+                },
+            });
+
+            if (result.count === 0) {
+                const error: AppError = new Error('Conflict: The product has been modified by another user.');
+                error.statusCode = 409;
+                throw error;
+            }
+
+            return await this.getById(id);
+        }
+
+        // Fallback for updates without version (less secure)
         return await prisma.producto.update({
             where: { id },
-            data,
+            data: {
+                ...updateData,
+                version: { increment: 1 },
+            },
         });
+    }
+
+    async adjustStock(id: string, quantity: number) {
+        // Atomic operation using Prisma's increment/decrement
+        const product = await prisma.producto.update({
+            where: { id },
+            data: {
+                stock: {
+                    increment: quantity,
+                },
+                version: { increment: 1 },
+            },
+        });
+
+        return product;
     }
 
     async delete(id: string) {

@@ -16,6 +16,7 @@ model Veterinario {
   password  String
   nombre    String
   apellido  String
+  version   Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -31,6 +32,7 @@ model Mascota {
   edad           Int
   dueñoNombre   String
   dueñoContacto String
+  version        Int      @default(1)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -46,6 +48,7 @@ model Cita {
   descripcion String?
   estado      String   @default("pendiente") // pendiente, completada, cancelada
   tipo        String   @default("medica") // medica, estetica
+  version     Int      @default(1)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -62,6 +65,7 @@ model Producto {
   precio      Float
   stock       Int      @default(0)
   categoria   String   @default("farmacia") // farmacia, alimento, accesorio
+  version     Int      @default(1)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

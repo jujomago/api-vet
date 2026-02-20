@@ -88,6 +88,41 @@ router.post('/', productController.create as any);
  */
 router.get('/:id', productController.getById as any);
 router.patch('/:id', productController.update as any);
+
+/**
+ * @swagger
+ * /products/{id}/stock:
+ *   patch:
+ *     summary: Adjust product stock (atomic)
+ *     tags: [Inventory]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - quantity
+ *             properties:
+ *               quantity:
+ *                 type: number
+ *                 description: Amount to add (positive) or subtract (negative)
+ *     responses:
+ *       200:
+ *         description: Stock adjusted
+ *       400:
+ *         description: Invalid quantity
+ */
+router.patch('/:id/stock', productController.adjustStock as any);
+
 router.delete('/:id', productController.delete as any);
 
 export default router;
